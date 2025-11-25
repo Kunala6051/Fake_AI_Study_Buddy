@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moodio Dashboard</title>
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'chatbot/dashboard.css' %}">
+  <style>
+    body {
+      {% comment %} background: linear-gradient(135deg, #e0f2ff, #f0e6ff); {% endcomment %}
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .progress-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 25px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* ----- Progress Card Styling ----- */
+    .progress {
+      background: #fff;
+      flex: 1;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      min-width: 340px;
+    }
+
+    .progress h4 {
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #111;
+    }
+
+    .progress-item {
+      margin-bottom: 18px;
+    }
+
+    .progress-item span {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .bar {
+      height: 8px;
+      background: #e3e6eb;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .fill {
+      height: 8px;
+      background: linear-gradient(90deg, #3b82f6, #6366f1);
+      border-radius: 10px;
+      transition: width 0.4s ease;
+    }
+
+    .progress-item small {
+      color: #555;
+    }
+
+    /* Quiz Results Styling */
+    .quiz-results {
+      background: #fff;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      min-width: 300px;
+      flex: 0.7;
+    }
+
+    .quiz-results h4 {
+      font-weight: 600;
+      color: #111;
+      margin-bottom: 15px;
+    }
+
+    .quiz-results p {
+      color: #333;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="logo">
+      <img src="{% static 'chatbot/images/logo.png' %}" alt="Moodio Logo" class="logo-icon">
+      <div class="logo-text">
+        <span class="app-name">Moodio</span>
+        <span class="tagline">AI Study Buddy</span>
+      </div>
+    </div>
+
+    <nav>
+      <ul>
+        <li class="active"><a href="{% url 'chatbot:dashboard' %}"><i class="icon">🏠</i> Dashboard</a></li>
+        <li><a href="{% url 'chatbot:roadmap' %}"><i class="icon">🗺️</i> Study Plan</a></li>
+        <li><a href="{% url 'chatbot:quiz' %}"><i class="icon">🧠</i> Quizzes</a></li>
+        <li><a href="{% url 'chatbot:chat' %}"><i class="icon">💬</i> Chat</a></li>
+        <li><a href="#"><i class="icon">🏆</i> Rewards</a></li>
+        <li><a href="#"><i class="icon">📊</i> Analytics</a></li>
+      </ul>
+    </nav>
+
+    <div class="profile">
+      <div class="avatar">👤</div>
+      <div class="info">
+        <span class="name">{{ user_name }}</span>
+      </div>
+      <button class="logout">
+        <a class="icon" href="{% url 'chatbot:index' %}" style="text-decoration: none; color: black;">↪️ Logout</a>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Wrapper -->
+  <div class="container">
+
+    <!-- Greeting Section -->
+    <section class="greeting-card">
+      <div>
+        <h2>Great to see you, {{ user_name }}! ❤️</h2>
+        <p>Take a deep breath. We'll break things down into manageable steps.</p>
+        <span class="status">🟢 Ready to learn • {{ today }}</span>
+      </div>
+      <div class="emoji">👍</div>
+    </section>
+
+    <!-- Mood Section -->
+    <section class="mood-section">
+      <h3>How are you feeling today?</h3>
+      <div class="mood-options">
+        <button class="mood happy">😊 Happy</button>
+        <button class="mood motivated">⚡ Motivated</button>
+        <button class="mood tired">☕ Tired</button>
+        <button class="mood stressed active">🧠 Stressed</button>
+        <button class="mood sad">😞 Sad</button>
+      </div>
+      <p class="note">Great! I'll tailor your experience based on your current mood. 💜</p>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+      <div class="stat-card">3/11<br><span>Tasks Completed</span></div>
+      <div class="stat-card">1/2<br><span>Quizzes Done</span></div>
+      <div class="stat-card">67%<br><span>Average Score</span></div>
+      <div class="stat-card">0 days<br><span>Current Streak</span></div>
+      <div class="stat-card">0<br><span>Total Points</span></div>
+    </section>
+
+    <!-- Progress + Quiz Section -->
+    <section class="progress-section">
+      <div class="progress">
+        <h4>Your Roadmap Progress</h4>
+        <div id="roadmapProgress">
+          <p>Loading your roadmaps...</p>
+        </div>
+      </div>
+      <div class="quiz-results">
+        <h4>Recent Quiz Results</h4>
+        <p>React Fundamentals — <strong>67%</strong> (9/9/2025)</p>
+      </div>
+    </section>
+
+  </div> <!-- end container -->
+
+  <script>
+  // Mood Button Logic
+  document.querySelectorAll(".mood").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".mood").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
+
+  // Load Saved Roadmaps from backend
+  async function loadRoadmapProgress() {
+    try {
+      const res = await fetch("{% url 'chatbot:get_user_roadmaps' %}", {
+          cache: "no-store"
+      });
+
+      if (!res.ok) throw new Error("Failed to load user roadmaps");
+
+      const roadmaps = await res.json();
+      const container = document.getElementById("roadmapProgress");
+      container.innerHTML = "";
+
+      if (!roadmaps || roadmaps.length === 0) {
+        container.innerHTML = "<p>No roadmaps found yet.</p>";
+        return;
+      }
+
+      roadmaps.forEach(r => {
+        const percent = r.percentage || 0;
+
+        const div = document.createElement("div");
+        div.className = "progress-item";
+        div.innerHTML = `
+          <span>${r.title}</span>
+          <div class="bar"><div class="fill" style="width:${percent}%"></div></div>
+          <small>${percent}% completed • Total ${r.totalHours || 0} hrs</small>
+        `;
+        container.appendChild(div);
+      });
+    } catch (err) {
+      console.error("Error loading roadmap progress:", err);
+      document.getElementById("roadmapProgress").innerHTML = "<p>Failed to load progress.</p>";
+    }
+  }
+
+  window.addEventListener("DOMContentLoaded", loadRoadmapProgress);
+</script>
+
+</body>
+</html>

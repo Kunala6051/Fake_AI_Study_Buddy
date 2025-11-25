@@ -1,0 +1,174 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Body */
+body {
+  background: #f9fbff;
+  color: #111827;
+}
+
+/* Navbar */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 60px;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+} 
+
+nav .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #2563EB;
+}
+
+nav .logo img {
+  width: 32px;
+}
+
+nav .nav-links a {
+  margin-left: 20px;
+  text-decoration: none;
+  color: #2563EB;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+nav .nav-links a:hover {
+  color: #1D4ED8;
+}
+
+/* Signup container */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px;
+  max-width: 1200px;
+  margin: 40px auto;
+  gap: 50px;
+}
+
+/* Left Section */
+.auth-container .left {
+  flex: 1;
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.auth-container h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* Google Button */
+.google-btn {
+  width: 100%;
+  background: white;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.google-btn img {
+  width: 20px;
+}
+
+.google-btn:hover {
+  background: #f3f4f6;
+}
+
+/* Divider */
+.divider {
+  text-align: center;
+  margin: 20px 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Form Inputs */
+form input, form select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+form input:focus, form select:focus {
+  border-color: #2563EB;
+  outline: none;
+  box-shadow: 0 0 6px rgba(37, 99, 235, 0.3);
+}
+
+/* Checkbox */
+.checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;  /* ✅ ensures checkbox stays right before text */
+  gap: 8px;                     /* space between checkbox and text */
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #374151;
+  width: fit-content;           /* ✅ prevents stretching full width */
+}
+
+/* Buttons */
+.primary-btn {
+  width: 100%;
+  padding: 12px;
+  background: #2563EB;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.primary-btn:hover {
+  background: #1D4ED8;
+}
+
+/* Right Image */
+.auth-container .right img {
+  width: 350px;
+}
+
+/* Alternative Link */
+.alt-link {
+  margin-top: 15px;
+  font-size: 14px;
+  text-align: center;
+  color: #374151;
+}
+
+.alt-link a {
+  color: #2563EB;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.alt-link a:hover {
+  text-decoration: underline;
+}

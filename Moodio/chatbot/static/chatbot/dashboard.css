@@ -1,0 +1,269 @@
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /* font-family: "Segoe UI", sans-serif; */
+}
+
+/* General Layout */
+body {
+  background: #f9fbff;
+  color: #333;
+  font-family: "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+/* body {
+  min-height: 100vh;
+  margin: 0;
+  background:
+    linear-gradient(180deg, rgba(66,153,255,0.12), rgba(144,85,255,0.06)),
+    url("https://yourdomain.com/path/to/wavey.svg") no-repeat center top;
+  background-size: cover;
+  background-attachment: fixed;
+  background-blend-mode: overlay;
+} */
+  body {
+  background: linear-gradient(to bottom right, rgba(66,153,255,0.3), rgba(144,85,255,0.3)),
+              url("https://www.svgbackgrounds.com/wp-content/uploads/2021/05/wavey-fingerprint.svg");
+  background-size: cover;
+}
+
+
+/* Wrapper for page content */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.emoji {
+  font-size: 40px;
+}
+
+
+/* === NAVBAR === */
+.navbar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 45px;
+  background: linear-gradient(135deg, #4175e4, #9055ff);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  height: 42px;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  color: white;
+}
+
+.app-name {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.tagline {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* === NAVIGATION === */
+.navbar nav ul {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+}
+
+.navbar nav a {
+  text-decoration: none;
+  color: #f9fafb;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.navbar nav a:hover {
+  color: #ffd6ff;
+  transform: translateY(-2px);
+}
+
+.navbar nav .active a {
+  border-bottom: 2px solid #fff;
+}
+
+/* === PROFILE === */
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logout a {
+  background: white;
+  color: #000;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-block;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* optional soft shadow */
+}
+
+.logout a:hover {
+  background: #e0e7ff;
+}
+
+/* Greeting Card */
+.greeting-card {
+  margin: 30px auto;
+  padding: 40px;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: #fff;
+  border-radius: 16px;
+  max-width: 1100px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.greeting-card h2 {
+  font-size: 26px;
+  margin-bottom: 8px;
+}
+
+.greeting-card p {
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+/* Mood Section */
+.mood-section {
+  max-width: 1100px;
+  margin: 35px auto;
+  padding: 30px;
+  background: #fff;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+}
+
+.mood-options {
+  display: flex;
+  justify-content: space-evenly;
+  gap: 20px;
+  margin: 25px 0;
+}
+
+.mood {
+  flex: 1;
+  padding: 14px;
+  font-size: 15px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f0f4ff;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.mood:hover {
+  background: #dbeafe;
+}
+
+.mood.active {
+  border-color: #2563eb;
+  background: #dbeafe;
+  font-weight: bold;
+}
+
+/* Stats Section */
+.stats {
+  max-width: 1100px;
+  margin: 35px auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 25px;
+}
+
+.stat-card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 14px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+  color: #2563eb;
+}
+
+.stat-card span {
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+  color: #555;
+}
+
+/* Progress Section */
+.progress-section {
+  max-width: 1100px;
+  margin: 40px auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.progress, .quiz-results {
+  flex: 1;
+  min-width: 320px;
+  background: #fff;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+}
+
+.progress h4, .quiz-results h4 {
+  margin-bottom: 20px;
+  font-size: 18px;
+  color: #111827;
+}
+
+.progress-item {
+  margin-bottom: 25px;
+}
+
+.bar {
+  width: 100%;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+
+.fill {
+  height: 100%;
+  background: #2563eb;
+  border-radius: 5px;
+}

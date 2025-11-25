@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Study Assistant</title>
+  {% load static %}  <!-- Load static files -->
+  <link rel="stylesheet" type="text/css" href="{% static 'chatbot/chat.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header class="navbar">
+    <div class="logo">
+      <img src="{% static 'chatbot/images/logo.png' %}" alt="Moodio Logo" class="logo-icon">
+      <div class="logo-text">
+        <span class="app-name">Moodio</span>
+        <span class="tagline">AI Study Buddy</span>
+      </div>
+    </div>
+
+    <nav>
+      <ul>
+        <li><a href="dashboard.html"><i class="icon">🏠</i> Dashboard</a></li>
+        <li><a href="roadmap.html"><i class="icon">🗺️</i> Study Plan</a></li>
+        <li><a href="{% url 'chatbot:quiz' %}"><i class="icon">🧠</i> Quizzes</a></li>
+        <li class="active"><a href="chat.html"><i class="icon">💬</i> Chat</a></li>
+        <li><a href="#"><i class="icon">🏆</i> Rewards</a></li>
+        <li><a href="#"><i class="icon">📊</i> Analytics</a></li>
+      </ul>
+    </nav>
+
+    <div class="profile">
+      <div class="avatar">👤</div>
+      <div class="info">
+        <span class="name">{{ user_name }}</span>
+      </div>
+      <button href="index.html" class="logout">
+        {% comment %} below a tag should not be underlined so <a> should not have text-decoration: underline and color should be the same as the text {% endcomment %}
+        <a class="icon" href="{% url 'chatbot:index' %}" style="text-decoration: none; color: black;">↪️ Logout</a>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Chat Container -->
+  <div class="chat-app">
+    <div class="chat-box">
+      
+      <!-- Header -->
+      <div class="chat-header">
+        <div class="icon">
+          💬
+        </div>
+        <div>
+          <h1>AI Study Assistant</h1>
+          <p>Your intelligent learning companion</p>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="chat-messages" id="messages">
+        <div class="empty-state" id="emptyState">
+          🤖
+          <h3>Start a conversation!</h3>
+          <p>
+            I'm here to help you with your studies. Ask me anything about your learning materials,
+            study strategies, or just chat about how you're feeling!
+          </p>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <div class="chat-input">
+        <form id="chatForm">
+          <input type="text" id="messageInput" placeholder="Ask me anything about your studies..." />
+          <button type="submit">➤</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("chatForm");
+    const input = document.getElementById("messageInput");
+    const messagesDiv = document.getElementById("messages");
+    const emptyState = document.getElementById("emptyState");
+
+    function formatTime() {
+      return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    let loadingDiv = null;
+
+    function showLoading() {
+        if (emptyState) emptyState.style.display = "none";
+
+        loadingDiv = document.createElement("div");
+        loadingDiv.className = "message bot loading";
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+
+        // Animated dots loading indicator
+        bubble.innerHTML = `
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        `;
+
+        loadingDiv.appendChild(bubble);
+        messagesDiv.appendChild(loadingDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function hideLoading() {
+        if (loadingDiv) {
+            messagesDiv.removeChild(loadingDiv);
+            loadingDiv = null;
+        }
+    }
+
+
+    function addMessage(text, type = "user") {
+      if (emptyState) {
+        emptyState.style.display = "none";
+      }
+
+      const messageDiv = document.createElement("div");
+      messageDiv.className = `message ${type}`;
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.innerHTML = marked.parse(text.trim());
+
+      const time = document.createElement("div");
+      time.className = "time";
+      time.textContent = formatTime();
+
+      messageDiv.appendChild(bubble);
+      messageDiv.appendChild(time);
+
+      messagesDiv.appendChild(messageDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+
+      addMessage(text, "user");
+      showLoading();   // Show typing/loading indicator
+
+      $.get("/chatbot/getResponse", { userMessage: text })
+          .done(function(data) {
+              hideLoading();       // Remove loading indicator
+              addMessage(data.response, "bot");
+          })
+          .fail(function() {
+              hideLoading();
+              addMessage("Sorry, something went wrong.", "bot");
+          });
+
+      input.value = "";
+  });
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+    // Load chat history when page loads
+    // Load chat history when page loads
+  $(document).ready(function() {
+      $.get("/chatbot/getChatHistory")  // if view uses session, no need for user param
+          .done(function(data) {
+              data.history.forEach(pair => {
+                  addMessage(pair.message, "user");   // match Mongo fields
+                  addMessage(pair.response, "bot");
+              });
+          })
+          .fail(function() {
+              console.error("Failed to load chat history.");
+          });
+  });
+
+
+
+  </script>
+</body>
+</html>

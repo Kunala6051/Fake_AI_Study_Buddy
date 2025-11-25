@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Roadmap Generator</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'chatbot/roadmap.css' %}">
+</head>
+<body>
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="logo">
+            <img src="{% static 'chatbot/images/logo.png' %}" alt="Moodio Logo" class="logo-icon">
+            <div class="logo-text">
+                <span class="app-name">Moodio</span>
+                <span class="tagline">AI Study Buddy</span>
+            </div>
+        </div>
+
+        <nav>
+            <ul>
+                <li><a href="{% url 'chatbot:dashboard' %}"><i class="icon">🏠</i> Dashboard</a></li>
+                <li class="active"><a href="{% url 'chatbot:roadmap' %}"><i class="icon">🗺️</i> Study Plan</a></li>
+                <li><a href="{% url 'chatbot:quiz' %}"><i class="icon">🧠</i> Quizzes</a></li>
+                <li><a href="{% url 'chatbot:chat' %}"><i class="icon">💬</i> Chat</a></li>
+                <li><a href="#"><i class="icon">🏆</i> Rewards</a></li>
+                <li><a href="#"><i class="icon">📊</i> Analytics</a></li>
+            </ul>
+        </nav>
+
+        <div class="profile">
+            <div class="avatar">👤</div>
+            <div class="info">
+                <span class="name">{{ user_name }}</span>
+            </div>
+            <button class="logout">
+                <a class="icon" href="{% url 'chatbot:index' %}" style="text-decoration: none; color: black;">↪️ Logout</a>
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="header">
+            <br><br>
+            <h1 style="color: #002574ff;">📚 Study Roadmap Generator</h1>
+            <p style="color: #000000ff;">Create your personalized learning journey with AI-powered study plans</p>
+        </div>
+
+        <div class="card input-section">
+            <form id="roadmapForm">
+                <div class="form-group">
+                    <label for="goal">What do you want to learn?</label>
+                    <input type="text" id="goal" placeholder="e.g., Learn React, Master Python, Study Data Science..." required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="timeframe">Timeframe</label>
+                        <input type="number" id="timeframe" min="1" max="52" value="4" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="timeunit">Time Unit</label>
+                        <select id="timeunit">
+                            <option value="weeks">Weeks</option>
+                            <option value="months">Months</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="level">Current Level</label>
+                        <select id="level">
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dailyTime">Daily Study Time (hours)</label>
+                        <input type="number" id="dailyTime" min="0.5" max="12" step="0.5" value="2" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="generate-btn" id="generateBtn">
+                    Generate My Roadmap ✨
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Generating your personalized study roadmap...</p>
+            </div>
+        </div>
+
+        <div class="card roadmap-section" id="roadmapSection" style="display:none;">
+            <div class="roadmap-header">
+                <div class="roadmap-title" id="roadmapTitle">Your Study Roadmap</div>
+                <div class="progress-info">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span class="progress-text" id="progressText">0% Complete</span>
+                    <button class="reset-btn" id="resetBtn">Reset Progress</button>
+                </div>
+            </div>
+
+            <div class="stats-section" id="statsSection">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalTasks">0</div>
+                    <div class="stat-label">Total Tasks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="completedTasks">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="remainingTasks">0</div>
+                    <div class="stat-label">Remaining</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="estimatedHours">0</div>
+                    <div class="stat-label">Est. Hours</div>
+                </div>
+            </div>
+
+            <div class="weeks-container" id="weeksContainer">
+                <!-- Roadmap content will be generated here -->
+            </div>
+
+            <div class="saved-roadmaps" id="savedRoadmaps">
+                <h2>📂 Saved Roadmaps</h2>
+                <div id="roadmapList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let currentRoadmap = null;
+    let progress = {};
+
+    // Load user's roadmaps on page load
+    async function fetchAllRoadmaps() {
+        try {
+            const res = await fetch("{% url 'chatbot:get_user_roadmaps' %}");
+            if (!res.ok) throw new Error("Failed to load user roadmaps");
+            const roadmaps = await res.json(); // expected: [{ uuid, title, totalHours, percentage, completed }, ...]
+            displaySavedRoadmaps(roadmaps);
+        } catch (err) {
+            console.error("Error fetching roadmaps:", err);
+            document.getElementById("roadmapList").innerHTML = "<p>Could not load saved roadmaps.</p>";
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        fetchAllRoadmaps();
+    });
+
+    // ---------------------- Generate New Roadmap ----------------------
+    document.getElementById('roadmapForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const goal = document.getElementById('goal').value.trim();
+        const timeframe = parseInt(document.getElementById('timeframe').value);
+        const timeunit = document.getElementById('timeunit').value;
+        const level = document.getElementById('level').value;
+        const dailyTime = parseFloat(document.getElementById('dailyTime').value);
+
+        if (!goal) { alert('Please enter your learning goal'); return; }
+
+        document.getElementById('generateBtn').disabled = true;
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('roadmapSection').style.display = 'none';
+
+        try {
+            const response = await fetch("{% url 'chatbot:generate_roadmap' %}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie('csrftoken') },
+                body: JSON.stringify({ goal, timeframe, timeunit, level, dailyTime })
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error("Server error: " + errText);
+            }
+
+            const roadmap = await response.json();
+
+            if (!roadmap.weeks || roadmap.weeks.length === 0) {
+                alert("AI could not generate a roadmap. Try again with a different goal.");
+                return;
+            }
+
+            // Backend already inserts roadmap on generation and returns uuid (per your views.py).
+            currentRoadmap = roadmap;
+            progress = roadmap.progress || {};
+
+            displayRoadmap(currentRoadmap);
+            updateProgress();
+
+            // Refresh saved roadmap list from server so newly generated roadmap appears
+            fetchAllRoadmaps();
+
+        } catch (error) {
+            console.error('Error generating roadmap:', error);
+            alert('Error generating roadmap. Please try again.');
+        } finally {
+            document.getElementById('generateBtn').disabled = false;
+            document.getElementById('loading').style.display = 'none';
+        }
+    });
+
+    // ---------------------- Display Roadmap ----------------------
+    function displayRoadmap(roadmap) {
+        document.getElementById('roadmapTitle').textContent = roadmap.title;
+        const container = document.getElementById('weeksContainer');
+        container.innerHTML = '';
+
+        roadmap.weeks.forEach(week => container.appendChild(createWeekElement(week)));
+
+        document.getElementById('roadmapSection').style.display = 'block';
+        updateStats();
+    }
+
+    // ---------------------- Create Week Card ----------------------
+    function createWeekElement(week) {
+        const weekDiv = document.createElement('div');
+        weekDiv.className = 'week-card';
+        weekDiv.dataset.weekId = week.id;
+
+        weekDiv.innerHTML = `
+            <div class="week-header">
+                <div class="week-title">${escapeHtml(week.title)}</div>
+                <div class="week-description">${escapeHtml(week.description)}</div>
+            </div>
+            <div class="tasks-list">
+                ${week.tasks.map(task => `
+                    <div class="task-item" data-task-id="${task.id}">
+                        <input type="checkbox" class="task-checkbox" id="${task.id}" ${progress[task.id]?.completed ? "checked" : ""}>
+                        <div class="task-content">
+                            <div class="task-name">${escapeHtml(task.name)}</div>
+                            <div class="task-description">${escapeHtml(task.description)}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        weekDiv.querySelectorAll('.task-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const taskId = this.id;
+                const taskItem = this.closest('.task-item');
+                if (this.checked) {
+                    progress[taskId] = { completed: true, completedAt: new Date().toISOString() };
+                    taskItem.classList.add('completed');
+                } else {
+                    delete progress[taskId];
+                    taskItem.classList.remove('completed');
+                }
+                updateProgress();
+            });
+        });
+
+        // reflect week completion state
+        setTimeout(() => checkWeekCompletion(week.id), 0);
+
+        return weekDiv;
+    }
+
+    function checkWeekCompletion(weekId) {
+        const weekElement = document.querySelector(`[data-week-id="${weekId}"]`);
+        if (!weekElement) return;
+        const tasks = weekElement.querySelectorAll('.task-checkbox');
+        const completedTasks = Array.from(tasks).filter(task => task.checked);
+        if (completedTasks.length === tasks.length && tasks.length > 0) {
+            weekElement.classList.add('completed');
+        } else {
+            weekElement.classList.remove('completed');
+        }
+    }
+
+    // ---------------------- Update Progress ----------------------
+    async function updateProgress() {
+        if (!currentRoadmap) return;
+        const totalTasks = getTotalTasks();
+        const completed = Object.keys(progress).length;
+        const percentage = totalTasks ? Math.round((completed / totalTasks) * 100) : 0;
+
+        document.getElementById('progressFill').style.width = percentage + '%';
+        document.getElementById('progressText').textContent = percentage + '% Complete';
+        document.getElementById('totalTasks').textContent = totalTasks;
+        document.getElementById('completedTasks').textContent = completed;
+        document.getElementById('remainingTasks').textContent = totalTasks - completed;
+        document.getElementById('estimatedHours').textContent = currentRoadmap.totalHours || 0;
+
+        // Persist progress to backend
+        await saveProgressToServer();
+    }
+
+    // ---------------------- Stats ----------------------
+    function updateStats() {
+        updateProgress();
+    }
+
+    function getTotalTasks() {
+        return currentRoadmap?.weeks.reduce((total, week) => total + (week.tasks?.length || 0), 0) || 0;
+    }
+
+    // ---------------------- Reset ----------------------
+    document.getElementById('resetBtn').addEventListener('click', async () => {
+        if (!currentRoadmap) return;
+        if (confirm('Reset all progress?')) {
+            progress = {};
+            document.querySelectorAll('.task-checkbox').forEach(cb => cb.checked = false);
+            document.querySelectorAll('.task-item').forEach(item => item.classList.remove('completed'));
+            await updateProgress();
+            // also update server
+        }
+    });
+
+    // ---------------------- Persist progress to server ----------------------
+    async function saveProgressToServer() {
+        if (!currentRoadmap || !currentRoadmap.uuid) return;
+
+        try {
+            const res = await fetch("{% url 'chatbot:save_roadmap_progress' %}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie('csrftoken') },
+                body: JSON.stringify({ uuid: currentRoadmap.uuid, progress })
+            });
+
+            if (!res.ok) {
+                console.warn("Failed to save progress to server");
+            } else {
+                const payload = await res.json();
+                // optionally you can show payload.message to user
+                // Refresh metadata list to reflect completion flag if changed
+                fetchAllRoadmaps();
+            }
+        } catch (err) {
+            console.error("Error saving progress to server:", err);
+        }
+    }
+
+    // ---------------------- Display Saved Roadmaps ----------------------
+    function displaySavedRoadmaps(roadmaps) {
+        const container = document.getElementById("roadmapList");
+        container.innerHTML = "";
+
+        if (!roadmaps || roadmaps.length === 0) {
+            container.innerHTML = "<p>No saved roadmaps yet.</p>";
+            return;
+        }
+
+        roadmaps.forEach((r) => {
+            const div = document.createElement("div");
+            div.className = "saved-roadmap-item";
+            div.style.display = "flex";
+            div.style.justifyContent = "space-between";
+            div.style.alignItems = "center";
+            div.style.marginBottom = "10px";
+            div.style.border = "1px solid #ccc";
+            div.style.padding = "8px";
+            div.style.borderRadius = "5px";
+
+            // Roadmap title (clickable) - load full roadmap from server
+            const titleDiv = document.createElement("div");
+            titleDiv.style.cursor = "pointer";
+            titleDiv.innerHTML = `<strong>${escapeHtml(r.title)}</strong><br><small>${r.totalHours} total hours • ${r.percentage ?? 0}%</small>`;
+            titleDiv.addEventListener('click', () => loadRoadmapDetails(r.uuid));
+
+            // Delete button - call backend to delete
+            const delBtn = document.createElement("button");
+            delBtn.textContent = "Delete";
+            delBtn.style.background = "#ff4d4d";
+            delBtn.style.color = "#fff";
+            delBtn.style.border = "none";
+            delBtn.style.padding = "4px 8px";
+            delBtn.style.borderRadius = "3px";
+            delBtn.style.cursor = "pointer";
+
+            delBtn.addEventListener('click', async () => {
+                if (!confirm(`Delete roadmap "${r.title}"?`)) return;
+                try {
+                    const res = await fetch("{% url 'chatbot:delete_roadmap' %}", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie('csrftoken') },
+                        body: JSON.stringify({ uuid: r.uuid })
+                    });
+                    if (res.ok) {
+                        alert("Roadmap deleted successfully!");
+                        fetchAllRoadmaps();
+                        // If deleted roadmap was currently open, clear UI
+                        if (currentRoadmap?.uuid === r.uuid) {
+                            currentRoadmap = null;
+                            progress = {};
+                            document.getElementById('roadmapSection').style.display = 'none';
+                        }
+                    } else {
+                        const txt = await res.text();
+                        alert("Failed to delete roadmap: " + txt);
+                    }
+                } catch (err) {
+                    console.error("Delete failed", err);
+                    alert("Failed to delete roadmap.");
+                }
+            });
+
+            div.appendChild(titleDiv);
+            div.appendChild(delBtn);
+            container.appendChild(div);
+        });
+    }
+
+    // ---------------------- Load roadmap details from server ----------------------
+    async function loadRoadmapDetails(uuid) {
+        try {
+            // this path should map to your get_roadmap_details view: get_roadmap_details(request, uuid)
+            // If your URL pattern is different, update the line below.
+            const res = await fetch(`/chatbot/get_roadmap_details/${uuid}/`);
+
+            if (!res.ok) throw new Error("Failed to load roadmap details");
+            const roadmapDoc = await res.json(); // expected { uuid, user_name, roadmap, progress, ... }
+            if (!roadmapDoc || !roadmapDoc.roadmap) throw new Error("Invalid roadmap data");
+
+            currentRoadmap = { ...roadmapDoc.roadmap, uuid: roadmapDoc.uuid };
+            progress = roadmapDoc.progress || {};
+            displayRoadmap(currentRoadmap);
+            updateProgress();
+
+            // scroll to top to show the roadmap
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        } catch (err) {
+            console.error("Error loading roadmap details:", err);
+            alert("Could not load roadmap details. Try refreshing the page.");
+        }
+    }
+
+    // ---------------------- Helpers ----------------------
+    function escapeHtml(text = "") {
+        return String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // CSRF helper (Django)
+    function getCookie(name) {
+        const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return v ? v.pop() : '';
+    }
+</script>
+
+
+</body>
+</html>
+
+

@@ -1,0 +1,279 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+body {
+  background: #F9FAFB;
+  color: #111827;
+  line-height: 1.6;
+}
+
+/* Navbar */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000; /* Ensure it's above everything */
+  background: #fff;
+  padding: 15px 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+
+nav .logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2563EB;
+}
+
+nav .nav-links {
+  display: flex;
+  gap: 25px;
+}
+
+nav .nav-links a {
+  text-decoration: none;
+  color: #111827;
+  font-size: 16px;
+  transition: 0.2s;
+}
+
+nav .nav-links a:hover {
+  color: #2563EB;
+}
+
+nav .sign-in {
+  background: #2563EB;
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+nav .sign-in:hover {
+  background: #1D4ED8;
+}
+
+/* Auth Section */
+.auth {
+  display: flex;
+  justify-content: center; /* Horizontal centering */
+  align-items: center;     /* Vertically center */
+  min-height: calc(100vh - 70px); /* Full height minus navbar */
+  padding: 0 20px;
+  gap: 80px;
+  flex-wrap: wrap;
+}
+
+.auth-box {
+  background: #fff;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-illustration {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-illustration img {
+  max-width: 400px;
+  height: auto;
+}
+
+
+.auth-box h2 {
+  font-size: 28px;
+  color: #2563EB;
+  margin-bottom: 10px;
+}
+
+.auth-box .subtitle {
+  font-size: 14px;
+  color: #6B7280;
+  margin-bottom: 25px;
+}
+
+/* Google Button */
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.google-btn img {
+  width: 20px;
+}
+
+.google-btn:hover {
+  border-color: #2563EB;
+}
+
+/* Divider */
+.divider {
+  text-align: center;
+  margin: 20px 0;
+  font-size: 14px;
+  color: #6b7280;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  height: 1px;
+  background: #e5e7eb;
+  position: absolute;
+  top: 50%;
+  width: 40%;
+}
+
+.divider::before { left: 0; }
+.divider::after { right: 0; }
+
+/* Form */
+.auth-box input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.auth-box input:focus {
+  border-color: #2563EB;
+}
+
+.options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.forgot {
+  color: #2563EB;
+  text-decoration: none;
+}
+
+.forgot:hover {
+  text-decoration: underline;
+}
+
+/* Primary Button */
+.btn-primary {
+  background: #2563EB;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  width: 100%;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-primary:hover {
+  background: #1D4ED8;
+}
+
+.switch {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.switch a {
+  color: #2563EB;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.switch a:hover {
+  text-decoration: underline;
+}
+
+/* Illustration */
+.auth-illustration img {
+  max-width: 420px;
+  height: auto;
+}
+
+/* ================= RESPONSIVE DESIGN ================= */
+
+/* ✅ Tablets */
+@media (max-width: 992px) {
+  nav {
+    padding: 15px 30px; /* smaller navbar padding */
+  }
+
+  .auth {
+    flex-direction: column;
+    text-align: center;
+    padding: 60px 30px;
+    gap: 40px;
+  }
+
+  .auth-box {
+    max-width: 420px;
+  }
+
+  .auth-illustration img {
+    max-width: 320px;
+  }
+}
+
+/* ✅ Mobiles */
+@media (max-width: 600px) {
+  nav {
+    flex-direction: column; /* navbar items stacked */
+    gap: 15px;
+    padding: 15px 20px;
+  }
+
+  nav .nav-links {
+    flex-wrap: wrap; /* allow wrapping */
+    justify-content: center;
+    gap: 15px;
+  }
+
+  .auth {
+    padding: 40px 20px; /* smaller padding */
+  }
+
+  .auth-box {
+    padding: 25px;
+    border-radius: 12px;
+  }
+
+  .auth-box h2 {
+    font-size: 22px; /* smaller font */
+  }
+
+  .auth-illustration img {
+    max-width: 240px;
+  }
+}

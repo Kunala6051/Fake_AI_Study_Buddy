@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Quiz Maker</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'chatbot/quiz.css' %}">
+</head>
+<body>
+    <!-- Navbar (same as roadmap) -->
+    <header class="navbar">
+        <div class="logo">
+            <img src="{% static 'chatbot/images/logo.png' %}" alt="Moodio Logo" class="logo-icon">
+            <div class="logo-text">
+                <span class="app-name">Moodio</span>
+                <span class="tagline">AI Study Buddy</span>
+            </div>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{% url 'chatbot:dashboard' %}"><i class="icon">🏠</i> Dashboard</a></li>
+                <li><a href="{% url 'chatbot:roadmap' %}"><i class="icon">🗺️</i> Study Plan</a></li>
+                <li class="active"><a href="{% url 'chatbot:quiz' %}"><i class="icon">🧠</i> Quizzes</a></li>
+                <li><a href="{% url 'chatbot:chat' %}"><i class="icon">💬</i> Chat</a></li>
+                <li><a href="#"><i class="icon">🏆</i> Rewards</a></li>
+                <li><a href="#"><i class="icon">📊</i> Analytics</a></li>
+            </ul>
+        </nav>
+        <div class="profile">
+            <div class="avatar">👤</div>
+            <div class="info">
+                <span class="name">{{ user_name }}</span>
+            </div>
+            <button class="logout">
+                <a class="icon" href="{% url 'chatbot:index' %}" style="text-decoration: none; color: black;">↪️ Logout</a>
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="header">
+            <br><br>
+            <h1 style="color: #002574ff;">📝 AI Quiz Maker</h1>
+            <p style="color: #000000ff;">Generate a 10-question quiz on any topic and get your score instantly!</p>
+        </div>
+
+        <!-- Quiz Topic Input -->
+        <div class="card input-section">
+            <form id="quizForm">
+                <div class="form-group">
+                    <label for="quizTopic">Enter Quiz Topic</label>
+                    <input type="text" id="quizTopic" placeholder="e.g., Python Basics, Data Structures" required>
+                </div>
+                <button type="submit" class="generate-btn" id="generateQuizBtn">Generate Quiz 🧠</button>
+            </form>
+            <div class="loading" id="quizLoading">
+                <div class="spinner"></div>
+                <p>Generating quiz...</p>
+            </div>
+        </div>
+
+        <!-- Quiz Questions -->
+        <div class="card roadmap-section" id="quizSection" style="display:none;">
+            <form id="quizQuestionsForm">
+                <div id="questionsContainer"></div>
+                <button type="submit" class="generate-btn">Submit Quiz ✅</button>
+            </form>
+        </div>
+
+        <!-- Result -->
+        <div class="card roadmap-section" id="quizResult" style="display:none;">
+            <h2>🎯 Your Score</h2>
+            <p id="scoreText"></p>
+        </div>
+    </div>
+
+    <script>
+    let quizData = [];
+
+    // Generate quiz
+    document.getElementById('quizForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const topic = document.getElementById('quizTopic').value.trim();
+        if(!topic) return alert("Enter a topic");
+
+        document.getElementById('generateQuizBtn').disabled = true;
+        document.getElementById('quizLoading').style.display = 'block';
+        document.getElementById('quizSection').style.display = 'none';
+        document.getElementById('quizResult').style.display = 'none';
+
+        try {
+            const response = await fetch("{% url 'chatbot:generate_quiz' %}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ topic })
+            });
+            if(!response.ok) throw new Error("Server error");
+            const data = await response.json();
+            quizData = data.questions; // Expect 10 MCQs with options and correct answer
+            displayQuiz(quizData);
+        } catch(e) {
+            console.error(e);
+            alert("Failed to generate quiz.");
+        } finally {
+            document.getElementById('generateQuizBtn').disabled = false;
+            document.getElementById('quizLoading').style.display = 'none';
+        }
+    });
+
+    function displayQuiz(questions) {
+        const container = document.getElementById('questionsContainer');
+        container.innerHTML = '';
+        questions.forEach((q, index) => {
+            container.innerHTML += `
+                <div class="form-group">
+                    <label><b>Q${index+1}: ${q.question}</b></label>
+                    ${q.options.map((opt, i) => `
+                        <div>
+                            <input type="radio" name="q${index}" value="${i}" required> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        });
+        document.getElementById('quizSection').style.display = 'block';
+    }
+
+    // Submit quiz
+    document.getElementById('quizQuestionsForm').addEventListener('submit', function(e){
+        e.preventDefault();
+        const formData = new FormData(this);
+        let score = 0;
+        quizData.forEach((q, index) => {
+            const answer = parseInt(formData.get(`q${index}`));
+            if(answer === q.correct) score++;
+        });
+        const percentage = Math.round((score/quizData.length)*100);
+        document.getElementById('scoreText').textContent = `You scored ${score} out of ${quizData.length} (${percentage}%)`;
+        document.getElementById('quizResult').style.display = 'block';
+
+        // Send result to Django
+        fetch("{% url 'chatbot:save_quiz_result' %}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                topic: document.getElementById('quizTopic').value,
+                score,
+                total: quizData.length,
+                percentage,
+                datetime: new Date().toISOString()
+            })
+        });
+    });
+    </script>
+</body>
+</html>
